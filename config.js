@@ -64,7 +64,6 @@ const ui = {
 };
 
 const CONFIG = {
-  shareUrl: 'https://vlle1.github.io/gamejam_2026_10-dev-helper/',
   designWidth: 960,
   designHeight: 540,
   round: {

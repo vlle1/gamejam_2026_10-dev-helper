@@ -397,7 +397,7 @@ function drawHighscoreImage() {
   imageContext.fillText('hole in 0', 970, 570);
   imageContext.fillStyle = '#71807b';
   imageContext.font = '500 18px "DM Mono", monospace';
-  const shareUrl = window.location.protocol.startsWith('http') ? window.location.href : CONFIG.shareUrl;
+  const shareUrl = getShareUrl();
   imageContext.fillText(shareUrl, 70, 610);
   return image;
 }
@@ -407,12 +407,20 @@ function downloadHighscoreArtwork(image, filename) {
   link.href = image.toDataURL('image/png');
   link.click();
 }
+function getShareUrl() {
+  return /^https?:$/i.test(window.location.protocol) ? window.location.href : '';
+}
 async function shareHighscoreArtwork() {
   if (!highscoreShareData) return;
   const image = drawHighscoreImage();
   const blob = await new Promise(resolve => image.toBlob(resolve, 'image/png'));
   const filename = `hole-in-0-${highscoreShareData.level.id}-highscore.png`;
-  const shareText = t('highscore.shareText', { level: levelName(highscoreShareData.level), rounds: highscoreShareData.rounds, url: window.location.protocol.startsWith('http') ? window.location.href : CONFIG.shareUrl });
+  const shareUrl = getShareUrl();
+  const shareText = t(shareUrl ? 'highscore.shareText' : 'highscore.shareTextNoUrl', {
+    level: levelName(highscoreShareData.level),
+    rounds: highscoreShareData.rounds,
+    url: shareUrl
+  });
   try {
     if (blob && navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'image/png' })] })) {
       await navigator.share({ title: 'hole in 0', text: shareText, files: [new File([blob], filename, { type: 'image/png' })] });
