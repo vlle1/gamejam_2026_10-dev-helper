@@ -42,9 +42,11 @@ function hideStarRules() {
 }
 function recordLevelWin(level, rounds) {
   const best = getBestRounds(level.id);
-  if (best === null || rounds < best) localStorage.setItem(`${STORAGE_PREFIX}best:${level.id}`, String(rounds));
+  const isNewBest = best === null || rounds < best;
+  if (isNewBest) localStorage.setItem(`${STORAGE_PREFIX}best:${level.id}`, String(rounds));
   const nextLevel = LEVELS[LEVELS.indexOf(level) + 1];
   if (nextLevel) localStorage.setItem(`${STORAGE_PREFIX}unlocked:${nextLevel.id}`, 'true');
+  return isNewBest;
 }
 function boardCoordinate(point) {
   const level = getLevel();

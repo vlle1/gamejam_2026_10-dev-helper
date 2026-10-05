@@ -77,6 +77,8 @@ ui.startButton.addEventListener('click', () => { beginGame(); enterMobileMode();
 ui.levelIntroButton.addEventListener('click', hideLevelIntro);
 ui.roundStars.addEventListener('click', event => showStarRules(getLevel(), event.currentTarget));
 ui.starRulesCloseButton.addEventListener('click', hideStarRules);
+ui.closeHighscoreButton.addEventListener('click', closeHighscoreArtwork);
+ui.shareHighscoreButton.addEventListener('click', shareHighscoreArtwork);
 ui.tipsButton.addEventListener('click', () => {
   ui.tipsPanel.hidden = !ui.tipsPanel.hidden;
   ui.tipsButton.textContent = ui.tipsPanel.hidden ? t('tips.show') : t('tips.hide');
@@ -166,6 +168,10 @@ document.addEventListener('keydown', event => {
       closePauseMenu();
       return;
     }
+  }
+  if (event.key === 'Escape' && !ui.highscoreModal.hidden) {
+    closeHighscoreArtwork();
+    return;
   }
   if (event.key === 'Enter' && !event.repeat) beginGame();
 });

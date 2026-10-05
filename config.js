@@ -47,7 +47,14 @@ const ui = {
   pauseTipTitle: document.getElementById('pauseTipTitle'),
   pauseTipText: document.getElementById('pauseTipText'),
   pauseNextTipButton: document.getElementById('pauseNextTipButton'),
-  pauseLangToggle: document.getElementById('pauseLangToggle')
+  pauseLangToggle: document.getElementById('pauseLangToggle'),
+  highscoreModal: document.getElementById('highscoreModal'),
+  highscoreTitle: document.getElementById('highscoreTitle'),
+  highscoreRounds: document.getElementById('highscoreRounds'),
+  roundVisualization: document.getElementById('roundVisualization'),
+  shareHighscoreButton: document.getElementById('shareHighscoreButton'),
+  closeHighscoreButton: document.getElementById('closeHighscoreButton'),
+  shareStatus: document.getElementById('shareStatus')
 };
 
 const CONFIG = {

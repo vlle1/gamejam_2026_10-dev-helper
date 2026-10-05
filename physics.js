@@ -19,6 +19,7 @@ function createState() {
     difficulty: localStorage.getItem(`${STORAGE_PREFIX}difficulty`) || CONFIG.difficulty.default,
     restPoints: [],
     history: [],
+    roundTargetCounts: [],
     ball: { x: 0, y: 0, vx: 0, vy: 0, r: CONFIG.ball.radius }
   };
 }

@@ -89,12 +89,13 @@ function checkInitialCollisions() {
     state.shotInMotion = false;
     state.running = false;
     state.gameOver = true;
-    recordLevelWin(getLevel(), state.round);
+    const isNewBest = recordLevelWin(getLevel(), state.round);
     setPhase('phase.won');
     ui.message.textContent = t('message.won', { level: levelName(getLevel()) });
     showBanner(t('banner.win', { level: levelName(getLevel()) }), getLevelStars(getLevel()));
     ui.startButton.textContent = t('start.playAgain');
     renderLevelSelector();
+    if (isNewBest) showHighscoreArtwork(getLevel(), state.round, state.roundTargetCounts);
     return true;
   }
 
@@ -108,6 +109,7 @@ function beginGame(levelId = state.levelId) {
   state.round = CONFIG.round.first;
   state.strokes = 0;
   state.history = [];
+  state.roundTargetCounts = [];
   state.restPoints = [];
   state.items = [];
   state.predictionCharges = 0;
@@ -115,6 +117,7 @@ function beginGame(levelId = state.levelId) {
   resetBall(false);
   state.restPoints.push({ x: state.ball.x, y: state.ball.y });
   state.targets = createTargets();
+  state.roundTargetCounts.push(state.targets.length);
   state.items = createItems();
   state.items.forEach(item => { if (item.type === 'barrier') addBarrierBody(item); });
   ui.appShell.classList.remove('is-intro');
@@ -132,6 +135,7 @@ function setRound(nextRound, result) {
   state.round = nextRound;
   state.strokes = 0;
   state.targets = previousRestPoints.map(point => createTarget(point, getTargetRadius(getLevel(), true)));
+  state.roundTargetCounts.push(state.targets.length);
   stopBall();
   state.restPoints = [];
   state.restPoints.push({ x: state.ball.x, y: state.ball.y });
@@ -304,4 +308,83 @@ function endGame() {
   ui.message.textContent = t('message.over', { rounds: state.round - 1 });
   showBanner(t('banner.gameover'));
   ui.startButton.textContent = t('start.playAgain');
+}
+
+let highscoreShareData = null;
+function showHighscoreArtwork(level, rounds, targetCounts) {
+  highscoreShareData = { level, rounds, targetCounts: targetCounts.slice(0, rounds) };
+  ui.highscoreTitle.textContent = levelName(level);
+  ui.highscoreRounds.textContent = rounds;
+  ui.roundVisualization.innerHTML = highscoreShareData.targetCounts.map((count, index) => `
+    <span class="round-bar" style="--target-count:${Math.max(count, 1)}">
+      <i>${count}</i><b></b><small>${index + 1}</small>
+    </span>`).join('');
+  ui.highscoreModal.hidden = false;
+  ui.closeHighscoreButton.focus();
+}
+function closeHighscoreArtwork() {
+  ui.highscoreModal.hidden = true;
+  ui.shareStatus.textContent = '';
+}
+function drawHighscoreImage() {
+  const image = document.createElement('canvas');
+  image.width = 1200;
+  image.height = 630;
+  const imageContext = image.getContext('2d');
+  imageContext.fillStyle = '#f4f1e9';
+  imageContext.fillRect(0, 0, image.width, image.height);
+  imageContext.fillStyle = '#1e6b5b';
+  imageContext.fillRect(0, 0, image.width, 22);
+  imageContext.fillStyle = '#17211f';
+  imageContext.font = '600 28px "DM Mono", monospace';
+  imageContext.fillText(t('highscore.eyebrow'), 70, 92);
+  imageContext.font = '700 76px "Space Grotesk", sans-serif';
+  imageContext.fillText(levelName(highscoreShareData.level), 70, 180);
+  imageContext.font = '600 44px "Space Grotesk", sans-serif';
+  imageContext.fillText(`${highscoreShareData.rounds} ${t('highscore.rounds')}`, 70, 250);
+  imageContext.font = '500 24px "DM Mono", monospace';
+  imageContext.fillStyle = '#71807b';
+  imageContext.fillText(t('highscore.targetsPerRound'), 70, 320);
+  const counts = highscoreShareData.targetCounts;
+  const max = Math.max(...counts, 1);
+  counts.forEach((count, index) => {
+    const x = 80 + index * 100;
+    const barHeight = 170 * count / max;
+    imageContext.fillStyle = '#e94b3c';
+    imageContext.fillRect(x, 530 - barHeight, 54, barHeight);
+    imageContext.fillStyle = '#17211f';
+    imageContext.font = '600 22px "DM Mono", monospace';
+    imageContext.fillText(String(count), x + 17, 555 - barHeight);
+    imageContext.fillStyle = '#71807b';
+    imageContext.fillText(String(index + 1), x + 20, 580);
+  });
+  imageContext.fillStyle = '#1e6b5b';
+  imageContext.font = '600 24px "DM Mono", monospace';
+  imageContext.fillText('hole in 0', 970, 570);
+  return image;
+}
+async function shareHighscoreArtwork() {
+  if (!highscoreShareData) return;
+  const image = drawHighscoreImage();
+  const blob = await new Promise(resolve => image.toBlob(resolve, 'image/png'));
+  const filename = `hole-in-0-${highscoreShareData.level.id}-highscore.png`;
+  const shareText = t('highscore.shareText', { level: levelName(highscoreShareData.level), rounds: highscoreShareData.rounds });
+  try {
+    if (blob && navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+      await navigator.share({ title: 'hole in 0', text: shareText, files: [new File([blob], filename, { type: 'image/png' })] });
+      ui.shareStatus.textContent = t('highscore.shared');
+      return;
+    }
+    if (window.AndroidShare && typeof window.AndroidShare.shareText === 'function') {
+      window.AndroidShare.shareText(shareText);
+      ui.shareStatus.textContent = t('highscore.shared');
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(shareText);
+      ui.shareStatus.textContent = t('highscore.copied');
+    } else {
+      ui.shareStatus.textContent = shareText;
+    }
+  } catch (error) {
+    if (error.name !== 'AbortError') ui.shareStatus.textContent = t('highscore.shareFailed');
+  }
 }
