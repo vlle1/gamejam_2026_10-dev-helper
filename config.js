@@ -36,7 +36,18 @@ const ui = {
   appShell: document.getElementById('appShell'),
   controlPanel: document.querySelector('.control-panel'),
   message: document.getElementById('message'),
-  roundBanner: document.getElementById('roundBanner')
+  roundBanner: document.getElementById('roundBanner'),
+  pauseButton: document.getElementById('pauseButton'),
+  pauseMenu: document.getElementById('pauseMenu'),
+  pauseResumeButton: document.getElementById('pauseResumeButton'),
+  pauseRestartButton: document.getElementById('pauseRestartButton'),
+  pauseLevelButton: document.getElementById('pauseLevelButton'),
+  pauseTipsButton: document.getElementById('pauseTipsButton'),
+  pauseTipsPanel: document.getElementById('pauseTipsPanel'),
+  pauseTipTitle: document.getElementById('pauseTipTitle'),
+  pauseTipText: document.getElementById('pauseTipText'),
+  pauseNextTipButton: document.getElementById('pauseNextTipButton'),
+  pauseLangToggle: document.getElementById('pauseLangToggle')
 };
 
 const CONFIG = {

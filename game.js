@@ -1,8 +1,17 @@
-﻿function enterMobileMode() {
-  const isMobile = window.matchMedia('(pointer: coarse)').matches
-    || window.matchMedia('(max-width: 850px)').matches
-    || window.matchMedia('(orientation: landscape) and (max-height: 600px)').matches;
-  if (!isMobile) return;
+﻿// --- Device detection ---
+// Mobile mode is based on device capabilities (touch input), NOT resolution:
+// phones can have large, high-DPI screens, and desktops can have small
+// windows. A device with a coarse pointer (finger) is treated as mobile.
+function isTouchDevice() {
+  return window.matchMedia('(pointer: coarse)').matches
+    || (navigator.maxTouchPoints > 0 && !window.matchMedia('(pointer: fine)').matches);
+}
+function updateDeviceMode() {
+  document.body.classList.toggle('is-mobile', isTouchDevice());
+}
+function enterMobileMode() {
+  updateDeviceMode();
+  if (!isTouchDevice()) return;
   if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
 }
 
@@ -86,6 +95,60 @@ ui.startScreen.addEventListener('click', event => {
     ui.appShell.classList.remove('is-intro');
   }
 });
+
+// --- Pause menu (mobile) ---
+// The pause menu is the mobile replacement for the desktop control panel:
+// title, restart, level select, difficulty and tips in one overlay.
+function isPauseMenuOpen() {
+  return !ui.pauseMenu.hidden;
+}
+function openPauseMenu() {
+  if (!state.running || state.gameOver) return;
+  ui.pauseMenu.hidden = false;
+  ui.pauseButton.setAttribute('aria-expanded', 'true');
+  ui.pauseResumeButton.focus();
+}
+function closePauseMenu() {
+  ui.pauseMenu.hidden = true;
+  ui.pauseButton.setAttribute('aria-expanded', 'false');
+  ui.pauseButton.focus();
+}
+ui.pauseButton.addEventListener('click', openPauseMenu);
+ui.pauseResumeButton.addEventListener('click', closePauseMenu);
+// Clicking the dimmed backdrop closes the pause menu.
+ui.pauseMenu.addEventListener('click', event => {
+  if (event.target === ui.pauseMenu) closePauseMenu();
+});
+ui.pauseRestartButton.addEventListener('click', () => {
+  closePauseMenu();
+  beginGame();
+});
+ui.pauseLevelButton.addEventListener('click', () => {
+  closePauseMenu();
+  ui.appShell.classList.add('is-intro');
+  updateLevelContent();
+});
+ui.pauseTipsButton.addEventListener('click', () => {
+  // Mirror the tips panel state into the pause menu copy.
+  ui.pauseTipsPanel.hidden = !ui.pauseTipsPanel.hidden;
+  ui.pauseTipsButton.textContent = ui.pauseTipsPanel.hidden ? t('tips.show') : t('tips.hide');
+  if (!ui.pauseTipsPanel.hidden) syncPauseTip();
+});
+ui.pauseNextTipButton.addEventListener('click', () => {
+  updateTip();
+  syncPauseTip();
+});
+// Language toggle inside the pause menu (same behavior as the top-bar toggle).
+ui.pauseLangToggle.addEventListener('click', () => {
+  setLanguage(currentLang === 'de' ? 'en' : 'de');
+});
+// Keep the pause-menu tip text in sync with the shared tipIndex.
+function syncPauseTip() {
+  const level = getLevel();
+  const tips = levelTips(level);
+  ui.pauseTipTitle.textContent = t('tips.title', { n: state.tipIndex + 1, total: tips.length });
+  ui.pauseTipText.textContent = tips[state.tipIndex];
+}
 ui.mobileMenuButton.addEventListener('click', () => {
   const isOpen = ui.controlPanel.classList.toggle('is-open');
   ui.mobileMenuButton.setAttribute('aria-expanded', String(isOpen));
@@ -94,9 +157,15 @@ document.querySelectorAll('.difficulty-option').forEach(button => {
   button.addEventListener('click', () => setDifficulty(button.dataset.difficulty));
 });
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && !ui.starRulesModal.hidden) {
-    hideStarRules();
-    return;
+  if (event.key === 'Escape') {
+    if (!ui.starRulesModal.hidden) {
+      hideStarRules();
+      return;
+    }
+    if (isPauseMenuOpen()) {
+      closePauseMenu();
+      return;
+    }
   }
   if (event.key === 'Enter' && !event.repeat) beginGame();
 });
@@ -107,6 +176,7 @@ resetBall(false);
 state.targets = createTargets();
 applyStaticTranslations();
 updateLevelContent();
+updateDeviceMode();
 updateDifficultyUi();
 updateUi();
 requestAnimationFrame(loop);

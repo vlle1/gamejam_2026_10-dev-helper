@@ -37,6 +37,9 @@
       <div class="course-wrap">
         <canvas id="gameCanvas" aria-label="Spielbereich"></canvas>
         <div class="round-banner" id="roundBanner" aria-live="polite"></div>
+        <button class="pause-button" id="pauseButton" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Pause">
+          <span class="pause-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+        </button>
       </div>
       <aside class="control-panel">
         <div class="panel-heading">
@@ -95,6 +98,36 @@
         <h2 id="starRulesTitle"></h2>
         <ul class="star-rules-list" id="starRulesList"></ul>
         <button class="secondary-button" id="starRulesCloseButton" type="button" data-i18n="start.ok">OK</button>
+      </div>
+    </section>
+    <section class="pause-menu" id="pauseMenu" hidden role="dialog" aria-modal="true" aria-labelledby="pauseMenuTitle">
+      <div class="pause-card">
+        <div class="pause-header">
+          <div>
+            <p class="eyebrow">KIT GameJam / 2026</p>
+            <h2 id="pauseMenuTitle">hole in 0</h2>
+          </div>
+          <button class="lang-toggle" id="pauseLangToggle" type="button" aria-label="Sprache wechseln">EN</button>
+        </div>
+        <div class="pause-actions">
+          <button class="primary-button" id="pauseResumeButton" type="button" data-i18n="pause.resume">Weiterspielen</button>
+          <button class="secondary-button" id="pauseRestartButton" type="button" data-i18n="start.restart">Neu starten</button>
+          <button class="secondary-button" id="pauseLevelButton" type="button" data-i18n="levelMenu">Levelauswahl</button>
+          <button class="secondary-button" id="pauseTipsButton" type="button" data-i18n="tips.show">Tipps anzeigen</button>
+          <div class="difficulty-block">
+            <span class="difficulty-label" data-i18n="difficulty.label">Schwierigkeit</span>
+            <div class="difficulty-options" id="pauseDifficultyOptions" role="group" aria-label="Schwierigkeit">
+              <button class="difficulty-option" data-difficulty="easy" type="button" data-i18n="difficulty.easy">Leicht</button>
+              <button class="difficulty-option" data-difficulty="normal" type="button" data-i18n="difficulty.normal">Normal</button>
+              <button class="difficulty-option" data-difficulty="hard" type="button" data-i18n="difficulty.hard">Schwer</button>
+            </div>
+          </div>
+        </div>
+        <div class="tips-panel" id="pauseTipsPanel" hidden>
+          <strong id="pauseTipTitle">Tipp 1</strong>
+          <p id="pauseTipText"></p>
+          <button class="text-button" id="pauseNextTipButton" type="button" data-i18n="tips.next">Nächster Tipp</button>
+        </div>
       </div>
     </section>
     <div class="orientation-lock" aria-live="polite">

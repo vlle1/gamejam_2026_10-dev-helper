@@ -12,6 +12,8 @@ const LANG = {
     'difficulty.normal': 'Normal',
     'difficulty.hard': 'Schwer',
     'menu': 'Menü',
+    'pause.resume': 'Weiterspielen',
+    'pause.title': 'Pause',
     'phase.ready': 'Bereit zum Abschlag',
     'phase.drag': 'Ziehen für Stärke',
     'phase.release': 'Loslassen zum Abschlag',
@@ -96,6 +98,8 @@ const LANG = {
     'difficulty.normal': 'Normal',
     'difficulty.hard': 'Hard',
     'menu': 'Menu',
+    'pause.resume': 'Resume',
+    'pause.title': 'Paused',
     'phase.ready': 'Ready to shoot',
     'phase.drag': 'Drag for power',
     'phase.release': 'Release to shoot',
@@ -186,6 +190,8 @@ function applyStaticTranslations() {
   document.documentElement.lang = currentLang;
   const toggle = document.getElementById('langToggle');
   if (toggle) toggle.textContent = currentLang === 'de' ? 'EN' : 'DE';
+  const pauseToggle = document.getElementById('pauseLangToggle');
+  if (pauseToggle) pauseToggle.textContent = currentLang === 'de' ? 'EN' : 'DE';
   // Start button text depends on game state (not a static data-i18n element).
   if (ui.startButton) {
     if (state.running) {
