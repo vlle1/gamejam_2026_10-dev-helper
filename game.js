@@ -77,7 +77,8 @@ ui.startButton.addEventListener('click', () => { beginGame(); enterMobileMode();
 ui.levelIntroButton.addEventListener('click', hideLevelIntro);
 ui.roundStars.addEventListener('click', event => showStarRules(getLevel(), event.currentTarget));
 ui.starRulesCloseButton.addEventListener('click', hideStarRules);
-ui.closeHighscoreButton.addEventListener('click', closeHighscoreArtwork);
+ui.nextLevelButton.addEventListener('click', startNextHighscoreLevel);
+ui.replayLevelButton.addEventListener('click', replayHighscoreLevel);
 ui.shareHighscoreButton.addEventListener('click', shareHighscoreArtwork);
 ui.tipsButton.addEventListener('click', () => {
   ui.tipsPanel.hidden = !ui.tipsPanel.hidden;

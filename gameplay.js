@@ -95,7 +95,7 @@ function checkInitialCollisions() {
     showBanner(t('banner.win', { level: levelName(getLevel()) }), getLevelStars(getLevel()));
     ui.startButton.textContent = t('start.playAgain');
     renderLevelSelector();
-    if (isNewBest) showHighscoreArtwork(getLevel(), state.round, state.roundTargetCounts);
+    showHighscoreArtwork(getLevel(), state.round, state.roundTargetCounts, isNewBest);
     return true;
   }
 
@@ -112,7 +112,7 @@ function beginGame(levelId = state.levelId) {
   state.roundTargetCounts = [];
   state.restPoints = [];
   state.items = [];
-  state.predictionCharges = 0;
+  state.predictionCharges = getLevel().predictionCharges || 0;
   state.tipIndex = 0;
   resetBall(false);
   state.restPoints.push({ x: state.ball.x, y: state.ball.y });
@@ -229,7 +229,7 @@ function releaseShot() {
   const speed = CONFIG.ball.baseShotSpeed * fieldScale() * strength;
   setBallVelocity(Math.cos(state.angle) * speed, Math.sin(state.angle) * speed);
   // Prediction item only applies to this shot.
-  state.predictionCharges = 0;
+  if (!getLevel().predictionChargesPersistent) state.predictionCharges = 0;
   state.strokes += 1;
   state.shotInMotion = true;
   setPhase('phase.rolling');
@@ -303,28 +303,51 @@ function scoreName(delta) {
 function endGame() {
   state.gameOver = true;
   state.running = false;
-  recordLevelWin(getLevel(), state.round - 1);
   setPhase('phase.over');
   ui.message.textContent = t('message.over', { rounds: state.round - 1 });
   showBanner(t('banner.gameover'));
   ui.startButton.textContent = t('start.playAgain');
+  renderLevelSelector();
+  showHighscoreArtwork(getLevel(), state.round - 1, state.roundTargetCounts, false, false);
 }
 
 let highscoreShareData = null;
-function showHighscoreArtwork(level, rounds, targetCounts) {
-  highscoreShareData = { level, rounds, targetCounts: targetCounts.slice(0, rounds) };
+function showHighscoreArtwork(level, rounds, targetCounts, isNewBest = true, completed = true) {
+  const stars = getStarsForRounds(level, rounds);
+  const nextLevel = LEVELS[LEVELS.indexOf(level) + 1];
+  highscoreShareData = { level, rounds, stars, nextLevel, isNewBest, completed, targetCounts: targetCounts.slice(0, Math.max(rounds, 1)) };
+  ui.highscoreArtwork.querySelector('.eyebrow').textContent = !completed ? t('highscore.failed') : isNewBest ? t('highscore.eyebrow') : t('highscore.completed');
   ui.highscoreTitle.textContent = levelName(level);
   ui.highscoreRounds.textContent = rounds;
+  ui.highscoreCaption.textContent = completed ? t('highscore.caption', { rounds }) : t('highscore.failedCaption', { rounds });
+  ui.highscoreDifficulty.textContent = t(`difficulty.${state.difficulty}`);
+  ui.highscoreStars.innerHTML = `<span aria-hidden="true">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</span>`;
+  ui.highscoreStars.setAttribute('aria-label', t('level.stars', { n: stars }));
+  ui.shareHighscoreButton.hidden = !isNewBest || !completed;
+  ui.highscoreMap.width = 480;
+  ui.highscoreMap.height = 270;
+  drawLevelPreview(ui.highscoreMap, level);
+  ui.nextLevelButton.disabled = !nextLevel || !completed;
   ui.roundVisualization.innerHTML = highscoreShareData.targetCounts.map((count, index) => `
     <span class="round-bar" style="--target-count:${Math.max(count, 1)}">
       <i>${count}</i><b></b><small>${index + 1}</small>
     </span>`).join('');
   ui.highscoreModal.hidden = false;
-  ui.closeHighscoreButton.focus();
+  (nextLevel ? ui.nextLevelButton : ui.replayLevelButton).focus();
 }
 function closeHighscoreArtwork() {
   ui.highscoreModal.hidden = true;
   ui.shareStatus.textContent = '';
+}
+function replayHighscoreLevel() {
+  closeHighscoreArtwork();
+  beginGame(highscoreShareData.level.id);
+}
+function startNextHighscoreLevel() {
+  if (!highscoreShareData.nextLevel) return;
+  closeHighscoreArtwork();
+  beginGame(highscoreShareData.nextLevel.id);
+  showLevelIntro(getLevel());
 }
 function drawHighscoreImage() {
   const image = document.createElement('canvas');
@@ -337,11 +360,22 @@ function drawHighscoreImage() {
   imageContext.fillRect(0, 0, image.width, 22);
   imageContext.fillStyle = '#17211f';
   imageContext.font = '600 28px "DM Mono", monospace';
-  imageContext.fillText(t('highscore.eyebrow'), 70, 92);
+  imageContext.fillText(!highscoreShareData.completed ? t('highscore.failed') : highscoreShareData.isNewBest ? t('highscore.eyebrow') : t('highscore.completed'), 70, 92);
   imageContext.font = '700 76px "Space Grotesk", sans-serif';
   imageContext.fillText(levelName(highscoreShareData.level), 70, 180);
   imageContext.font = '600 44px "Space Grotesk", sans-serif';
   imageContext.fillText(`${highscoreShareData.rounds} ${t('highscore.rounds')}`, 70, 250);
+  imageContext.fillStyle = '#1e6b5b';
+  imageContext.font = '600 22px "DM Mono", monospace';
+  imageContext.fillText(t(`difficulty.${state.difficulty}`), 70, 290);
+  imageContext.fillStyle = '#ffd447';
+  imageContext.font = '600 42px "Space Grotesk", sans-serif';
+  imageContext.fillText(`${'★'.repeat(highscoreShareData.stars)}${'☆'.repeat(3 - highscoreShareData.stars)}`, 390, 248);
+  const map = document.createElement('canvas');
+  map.width = 480;
+  map.height = 270;
+  drawLevelPreview(map, highscoreShareData.level);
+  imageContext.drawImage(map, 650, 80, 480, 270);
   imageContext.font = '500 24px "DM Mono", monospace';
   imageContext.fillStyle = '#71807b';
   imageContext.fillText(t('highscore.targetsPerRound'), 70, 320);
@@ -368,15 +402,15 @@ async function shareHighscoreArtwork() {
   const image = drawHighscoreImage();
   const blob = await new Promise(resolve => image.toBlob(resolve, 'image/png'));
   const filename = `hole-in-0-${highscoreShareData.level.id}-highscore.png`;
-  const shareText = t('highscore.shareText', { level: levelName(highscoreShareData.level), rounds: highscoreShareData.rounds });
+  const shareText = t('highscore.shareText', { level: levelName(highscoreShareData.level), rounds: highscoreShareData.rounds, url: window.location.protocol.startsWith('http') ? window.location.href : CONFIG.shareUrl });
   try {
     if (blob && navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'image/png' })] })) {
       await navigator.share({ title: 'hole in 0', text: shareText, files: [new File([blob], filename, { type: 'image/png' })] });
       ui.shareStatus.textContent = t('highscore.shared');
       return;
     }
-    if (window.AndroidShare && typeof window.AndroidShare.shareText === 'function') {
-      window.AndroidShare.shareText(shareText);
+    if (window.AndroidShare && typeof window.AndroidShare.shareArtwork === 'function') {
+      window.AndroidShare.shareArtwork(image.toDataURL('image/png'), shareText, filename);
       ui.shareStatus.textContent = t('highscore.shared');
     } else if (navigator.clipboard) {
       await navigator.clipboard.writeText(shareText);

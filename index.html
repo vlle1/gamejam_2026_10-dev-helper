@@ -135,13 +135,15 @@
         <div class="highscore-artwork" id="highscoreArtwork">
           <p class="eyebrow" data-i18n="highscore.eyebrow">NEW PERSONAL BEST</p>
           <h2 id="highscoreTitle"></h2>
-          <div class="highscore-rounds"><strong id="highscoreRounds"></strong><span data-i18n="highscore.rounds">rounds</span></div>
+          <div class="highscore-meta"><div class="highscore-rounds"><strong id="highscoreRounds"></strong><span data-i18n="highscore.rounds">rounds</span></div><div class="highscore-stars" id="highscoreStars" aria-label="3 / 3 stars"></div></div>
+          <div class="highscore-difficulty" id="highscoreDifficulty"></div>
+          <canvas class="highscore-map" id="highscoreMap" aria-label="Level map"></canvas>
           <div class="round-visualization" id="roundVisualization" aria-label="Targets per round"></div>
-          <p class="highscore-caption" data-i18n="highscore.caption">Can you beat this run?</p>
+          <p class="highscore-caption" id="highscoreCaption"></p>
         </div>
         <div class="highscore-actions">
-          <button class="primary-button" id="shareHighscoreButton" type="button" data-i18n="highscore.share">Share artwork</button>
-          <button class="secondary-button" id="closeHighscoreButton" type="button" data-i18n="highscore.close">Continue</button>
+          <button class="primary-button" id="shareHighscoreButton" type="button" data-i18n="highscore.share">Teilen</button>
+          <div class="highscore-navigation"><button class="secondary-button" id="nextLevelButton" type="button" data-i18n="highscore.nextLevel">Nächstes Level</button><button class="secondary-button" id="replayLevelButton" type="button" data-i18n="highscore.replay">Nochmal spielen</button></div>
           <span class="share-status" id="shareStatus" role="status" aria-live="polite"></span>
         </div>
       </div>

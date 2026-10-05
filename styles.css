@@ -123,9 +123,13 @@ canvas:active { cursor: grabbing; }
 .highscore-artwork { position: relative; padding: 34px 36px 28px; background: linear-gradient(135deg, #fffdf7, #eef3e8); border-top: 9px solid var(--green); }
 .highscore-artwork::after { content: "0"; position: absolute; right: 26px; bottom: 8px; color: rgba(233, 75, 60, .14); font-size: 170px; font-weight: 700; line-height: 1; pointer-events: none; }
 .highscore-artwork h2 { position: relative; z-index: 1; max-width: 80%; margin: 8px 0 17px; font-size: clamp(30px, 6vw, 52px); line-height: .95; letter-spacing: -.07em; }
+.highscore-meta { position: relative; z-index: 1; display: flex; align-items: center; gap: 22px; }
 .highscore-rounds { position: relative; z-index: 1; display: flex; align-items: baseline; gap: 8px; color: var(--red); }
 .highscore-rounds strong { font-size: 42px; letter-spacing: -.08em; }
 .highscore-rounds span, .highscore-caption { color: var(--muted); font: 500 11px "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
+.highscore-stars { color: #ffd447; font-size: 25px; letter-spacing: .05em; text-shadow: 0 1px 0 #a86e16, 0 0 5px rgba(255, 225, 83, .8); }
+.highscore-difficulty { position: relative; z-index: 1; margin-top: 8px; color: var(--green); font: 600 11px "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
+.highscore-map { position: absolute; z-index: 0; top: 30px; right: 26px; width: 43%; height: auto; border: 3px solid var(--panel); box-shadow: 0 8px 20px rgba(36, 52, 47, .15); transform: rotate(2deg); }
 .round-visualization { position: relative; z-index: 1; display: flex; align-items: end; gap: 10px; min-height: 122px; margin-top: 20px; padding: 12px 0 0; border-top: 1px solid var(--line); }
 .round-bar { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: end; min-width: 19px; height: 108px; gap: 4px; }
 .round-bar i { color: var(--red); font: 600 11px "DM Mono", monospace; font-style: normal; }
@@ -133,7 +137,10 @@ canvas:active { cursor: grabbing; }
 .round-bar small { color: var(--muted); font: 10px "DM Mono", monospace; }
 .highscore-caption { position: relative; z-index: 1; margin: 18px 0 0; }
 .highscore-actions { display: grid; gap: 10px; padding: 20px 36px 24px; }
+.highscore-actions > [hidden] { display: none; }
 .highscore-actions .secondary-button { margin: 0; }
+.highscore-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.highscore-navigation button:disabled { cursor: not-allowed; opacity: .4; }
 .share-status { min-height: 16px; color: var(--green); font: 11px "DM Mono", monospace; text-align: center; }
 .start-button { width: 100%; }
 .app-shell:not(.is-intro) .start-screen { display: none; }
@@ -177,6 +184,8 @@ canvas:active { cursor: grabbing; }
   .start-card { padding: 28px 24px; }
   .highscore-artwork { padding: 28px 24px 22px; }
   .highscore-actions { padding: 17px 24px 21px; }
+  .highscore-map { top: 24px; right: 20px; width: 39%; }
+  .highscore-navigation { grid-template-columns: 1fr; }
 }
 /* --- Mobile device mode (touch devices, independent of resolution) --- */
 /* The body.is-mobile class is set from JS based on pointer/touch capability. */
