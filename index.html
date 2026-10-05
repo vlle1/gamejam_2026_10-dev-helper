@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hole in 0</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell is-intro" id="appShell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="21" fill="#e94b3c"/>
+          <circle cx="24" cy="24" r="15" fill="#fffdf7"/>
+          <circle cx="24" cy="24" r="9" fill="#fffdf7" stroke="#17211f" stroke-width="1.6"/>
+          <path d="M15.5 28.5 a9 9 0 0 0 17 0" fill="none" stroke="rgba(23,33,31,.18)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h1>hole in 0</h1>
+      </div>
+      <div class="scoreboard" aria-label="Spielstand">
+        <div><span data-i18n="scoreboard.round">Runde</span><span class="round-scoreline"><strong id="roundValue">01</strong><button class="round-stars" id="roundStarsValue" type="button" aria-haspopup="dialog" aria-label="0 / 3 Sterne"><i class="star-filled"></i><i class="star-empty">☆☆☆</i></button></span></div>
+        <div><span data-i18n="scoreboard.strokes">Schläge</span><strong id="strokesValue">0 / 6</strong></div>
+        <div class="desktop-stat"><span data-i18n="scoreboard.targets">Ziele</span><strong id="targetsValue">3</strong></div>
+        <div class="mobile-stat"><span data-i18n="scoreboard.power">Schlagstärke</span><strong id="powerValue">0%</strong></div>
+        <div class="mobile-stat"><span data-i18n="scoreboard.angle">Winkel</span><strong id="angleValue">0°</strong></div>
+        <button class="mobile-menu" id="mobileMenuButton" type="button" aria-expanded="false" data-i18n="menu">Menü</button>
+        <button class="lang-toggle" id="langToggle" type="button" aria-label="Sprache wechseln">EN</button>
+      </div>
+    </header>
+
+    <section class="game-layout">
+      <div class="course-wrap">
+        <canvas id="gameCanvas" aria-label="Spielbereich"></canvas>
+        <div class="round-banner" id="roundBanner" aria-live="polite"></div>
+      </div>
+      <aside class="control-panel">
+        <div class="panel-heading">
+          <span class="live-dot"></span>
+          <span id="phaseLabel" data-i18n="phase.ready">Bereit zum Abschlag</span>
+        </div>
+        <div class="meter-block">
+          <div class="meter-label"><span data-i18n="scoreboard.power">Schlagstärke</span><strong id="powerValuePanel">0%</strong></div>
+          <div class="power-track"><div id="powerBar"></div></div>
+        </div>
+        <div class="aim-readout"><span data-i18n="scoreboard.angle">Winkel</span><strong id="angleValuePanel">0°</strong></div>
+        <div class="difficulty-block">
+          <span class="difficulty-label" data-i18n="difficulty.label">Schwierigkeit</span>
+          <div class="difficulty-options" id="difficultyOptions" role="group" aria-label="Schwierigkeit">
+            <button class="difficulty-option" data-difficulty="easy" type="button" data-i18n="difficulty.easy">Leicht</button>
+            <button class="difficulty-option" data-difficulty="normal" type="button" data-i18n="difficulty.normal">Normal</button>
+            <button class="difficulty-option" data-difficulty="hard" type="button" data-i18n="difficulty.hard">Schwer</button>
+          </div>
+        </div>
+        <button class="primary-button" id="startButton">Spiel starten</button>
+        <button class="level-menu-button" id="levelMenuButton" type="button" data-i18n="levelMenu">Levelauswahl</button>
+        <button class="secondary-button" id="tipsButton" type="button" data-i18n="tips.show">Tipps anzeigen</button>
+        <p class="hint" id="hint" data-i18n="hint">Ziehe irgendwo auf dem Spielfeld zurück. Je weiter du ziehst, desto stärker der Schlag. Lass los, um den Ball zu schießen.</p>
+        <div class="tips-panel" id="tipsPanel" hidden>
+          <strong id="tipTitle">Tipp 1</strong>
+          <p id="tipText"></p>
+          <button class="text-button" id="nextTipButton" type="button" data-i18n="tips.next">Nächster Tipp</button>
+        </div>
+      </aside>
+    </section>
+
+    <footer class="footer-line">
+      <span id="message" data-i18n="message.default">Treffe alle roten Checkpoints mit maximal 6 Schlägen.</span>
+      <span class="legend"><i class="legend-dot target"></i> <span data-i18n="legend.open">offen</span> <i class="legend-dot hit"></i> <span data-i18n="legend.hit">getroffen</span> <i class="legend-x">×</i> <span data-i18n="legend.rest">letzter Ruhepunkt</span></span>
+    </footer>
+
+    <section class="start-screen" id="startScreen" aria-label="Titelbildschirm">
+      <div class="start-card title-card">
+        <p class="eyebrow">KIT GameJam / 2026</p>
+        <h2>hole in 0</h2>
+        <div class="level-selector" id="levelSelector" aria-label="Level auswählen"></div>
+        <p class="jam-credit" data-i18n="jamCredit">This game is part of the KIT GameJam <a href="https://itch.io/jam/dattel-kit-gamejam/results" target="_blank" rel="noreferrer"><code>you are your own enemy</code></a>.</p>
+      </div>
+    </section>
+    <section class="level-intro" id="levelIntro" hidden role="dialog" aria-modal="true" aria-labelledby="levelIntroTitle">
+      <div class="level-intro-card">
+        <p class="eyebrow">LEVEL INTRO</p>
+        <h2 id="levelIntroTitle"></h2>
+        <p id="levelIntroText"></p>
+        <button class="primary-button" id="levelIntroButton" type="button" data-i18n="start.continue">Los geht's</button>
+      </div>
+    </section>
+    <section class="star-rules-modal" id="starRulesModal" hidden role="dialog" aria-modal="true" aria-labelledby="starRulesTitle">
+      <div class="star-rules-card">
+        <p class="eyebrow" data-i18n="starRules.eyebrow">STERNEREGELN</p>
+        <h2 id="starRulesTitle"></h2>
+        <ul class="star-rules-list" id="starRulesList"></ul>
+        <button class="secondary-button" id="starRulesCloseButton" type="button" data-i18n="start.ok">OK</button>
+      </div>
+    </section>
+    <div class="orientation-lock" aria-live="polite">
+      <strong data-i18n="orientation.title">Bitte drehen</strong>
+      <span data-i18n="orientation.text">Das Spielfeld funktioniert im Querformat.</span>
+    </div>
+  </main>
+  <script src="matter.min.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="level-ui.js"></script>
+  <script src="physics.js"></script>
+  <script src="items.js"></script>
+  <script src="gameplay.js"></script>
+  <script src="rendering.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
