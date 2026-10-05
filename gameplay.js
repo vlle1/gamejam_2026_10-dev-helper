@@ -395,7 +395,17 @@ function drawHighscoreImage() {
   imageContext.fillStyle = '#1e6b5b';
   imageContext.font = '600 24px "DM Mono", monospace';
   imageContext.fillText('hole in 0', 970, 570);
+  imageContext.fillStyle = '#71807b';
+  imageContext.font = '500 18px "DM Mono", monospace';
+  const shareUrl = window.location.protocol.startsWith('http') ? window.location.href : CONFIG.shareUrl;
+  imageContext.fillText(shareUrl, 70, 610);
   return image;
+}
+function downloadHighscoreArtwork(image, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = image.toDataURL('image/png');
+  link.click();
 }
 async function shareHighscoreArtwork() {
   if (!highscoreShareData) return;
@@ -412,11 +422,16 @@ async function shareHighscoreArtwork() {
     if (window.AndroidShare && typeof window.AndroidShare.shareArtwork === 'function') {
       window.AndroidShare.shareArtwork(image.toDataURL('image/png'), shareText, filename);
       ui.shareStatus.textContent = t('highscore.shared');
-    } else if (navigator.clipboard) {
-      await navigator.clipboard.writeText(shareText);
-      ui.shareStatus.textContent = t('highscore.copied');
     } else {
-      ui.shareStatus.textContent = shareText;
+      downloadHighscoreArtwork(image, filename);
+      if (navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(shareText);
+        } catch (clipboardError) {
+          // The image download is still a successful share fallback.
+        }
+      }
+      ui.shareStatus.textContent = t('highscore.downloaded');
     }
   } catch (error) {
     if (error.name !== 'AbortError') ui.shareStatus.textContent = t('highscore.shareFailed');
