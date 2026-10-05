@@ -1,0 +1,24 @@
+name: Deploy (dev)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-dev:
+    name: Deploy to development
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run dev deployment script
+        run: |
+          chmod +x ./scripts/deploy-dev.sh
+          ./scripts/deploy-dev.sh
