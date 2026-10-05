@@ -74,6 +74,7 @@ canvas.addEventListener('pointercancel', event => {
 });
 //start: click / enter
 ui.startButton.addEventListener('click', () => { beginGame(); enterMobileMode(); });
+ui.undoButton.addEventListener('click', undoLastShot);
 ui.levelIntroButton.addEventListener('click', hideLevelIntro);
 ui.roundStars.addEventListener('click', event => showStarRules(getLevel(), event.currentTarget));
 ui.starRulesCloseButton.addEventListener('click', hideStarRules);
@@ -125,6 +126,10 @@ ui.pauseMenu.addEventListener('click', event => {
 ui.pauseRestartButton.addEventListener('click', () => {
   closePauseMenu();
   beginGame();
+});
+ui.pauseUndoButton.addEventListener('click', () => {
+  undoLastShot();
+  closePauseMenu();
 });
 ui.pauseLevelButton.addEventListener('click', () => {
   closePauseMenu();

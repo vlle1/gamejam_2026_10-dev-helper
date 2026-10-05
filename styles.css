@@ -76,6 +76,7 @@ canvas:active { cursor: grabbing; }
 .primary-button:hover { background: #164d42; transform: translateY(-2px); }
 .secondary-button, .text-button { border: 1px solid var(--line); padding: 10px 12px; color: var(--ink); background: transparent; cursor: pointer; font: 500 11px "DM Mono", monospace; }
 .secondary-button { margin-top: 10px; }
+.undo-button:disabled { opacity: .45; cursor: not-allowed; }
 .text-button { border: 0; padding: 0; color: var(--green); text-align: left; text-decoration: underline; text-underline-offset: 3px; }
 .tips-panel { margin-top: 16px; padding: 13px; background: #eef3e8; font-size: 12px; line-height: 1.45; }
 .tips-panel p { margin: 6px 0 10px; }

@@ -285,6 +285,9 @@ function updateUi() {
   ui.powerBar.style.width = power;
   ui.angle.textContent = angle;
   ui.anglePanel.textContent = angle;
+  const canUndo = Boolean(state.undoSnapshot);
+  ui.undoButton.disabled = !canUndo;
+  ui.pauseUndoButton.disabled = !canUndo;
 }
 function loop(time) {
   const elapsed = (time - state.lastTime) / CONFIG.frame.millisecondsPerSecond;

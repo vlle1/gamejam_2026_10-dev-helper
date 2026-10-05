@@ -109,6 +109,7 @@ function beginGame(levelId = state.levelId) {
   state.round = CONFIG.round.first;
   state.strokes = 0;
   state.history = [];
+  state.undoSnapshot = null;
   state.roundTargetCounts = [];
   state.restPoints = [];
   state.items = [];
@@ -127,6 +128,75 @@ function beginGame(levelId = state.levelId) {
   if (!checkInitialCollisions()) {
     ui.message.textContent = t('message.nextRound');
   }
+  updateUi();
+}
+
+function captureUndoSnapshot() {
+  return {
+    running: state.running,
+    gameOver: state.gameOver,
+    round: state.round,
+    strokes: state.strokes,
+    angle: state.angle,
+    power: state.power,
+    targets: state.targets.map(target => ({ ...target })),
+    items: state.items.map(item => ({ ...item })),
+    predictionCharges: state.predictionCharges,
+    restPoints: state.restPoints.map(point => ({ ...point })),
+    history: state.history.slice(),
+    roundTargetCounts: state.roundTargetCounts.slice(),
+    ball: { ...state.ball },
+    message: ui.message.textContent,
+    best: localStorage.getItem(`${STORAGE_PREFIX}best:${state.levelId}`),
+    nextLevelUnlocked: LEVELS[LEVELS.indexOf(getLevel()) + 1]
+      ? localStorage.getItem(`${STORAGE_PREFIX}unlocked:${LEVELS[LEVELS.indexOf(getLevel()) + 1].id}`)
+      : null
+  };
+}
+
+function undoLastShot() {
+  const snapshot = state.undoSnapshot;
+  if (!snapshot) return;
+
+  state.undoSnapshot = null;
+  state.running = snapshot.running;
+  state.gameOver = snapshot.gameOver;
+  state.round = snapshot.round;
+  state.strokes = snapshot.strokes;
+  state.angle = snapshot.angle;
+  state.power = snapshot.power;
+  state.dragging = false;
+  state.dragStart = null;
+  state.dragCurrent = null;
+  state.shotInMotion = false;
+  state.targets = snapshot.targets.map(target => ({ ...target }));
+  state.items = snapshot.items.map(item => ({ ...item }));
+  state.predictionCharges = snapshot.predictionCharges;
+  state.restPoints = snapshot.restPoints.map(point => ({ ...point }));
+  state.history = snapshot.history.slice();
+  state.roundTargetCounts = snapshot.roundTargetCounts.slice();
+  setBallPosition(snapshot.ball.x, snapshot.ball.y);
+  setBallVelocity(snapshot.ball.vx, snapshot.ball.vy);
+  state.ball.r = snapshot.ball.r;
+
+  clearBarrierBodies();
+  state.items
+    .filter(item => item.type === 'barrier' && item.active && !item._consumed)
+    .forEach(addBarrierBody);
+  const bestKey = `${STORAGE_PREFIX}best:${state.levelId}`;
+  if (snapshot.best === null) localStorage.removeItem(bestKey);
+  else localStorage.setItem(bestKey, snapshot.best);
+  const nextLevel = LEVELS[LEVELS.indexOf(getLevel()) + 1];
+  if (nextLevel) {
+    const unlockedKey = `${STORAGE_PREFIX}unlocked:${nextLevel.id}`;
+    if (snapshot.nextLevelUnlocked === null) localStorage.removeItem(unlockedKey);
+    else localStorage.setItem(unlockedKey, snapshot.nextLevelUnlocked);
+  }
+  ui.message.textContent = snapshot.message;
+  ui.highscoreModal.hidden = true;
+  ui.roundBanner.classList.remove('show', 'hole-in-zero');
+  setPhase('phase.ready');
+  stopBallBody();
   updateUi();
 }
 
@@ -227,6 +297,7 @@ function releaseShot() {
   state.dragCurrent = null;
   const strength = Math.max(CONFIG.ball.minimumStrength, state.power / CONFIG.ball.maximumPower);
   const speed = CONFIG.ball.baseShotSpeed * fieldScale() * strength;
+  state.undoSnapshot = captureUndoSnapshot();
   setBallVelocity(Math.cos(state.angle) * speed, Math.sin(state.angle) * speed);
   // Prediction item only applies to this shot.
   if (!getLevel().predictionChargesPersistent) state.predictionCharges = 0;

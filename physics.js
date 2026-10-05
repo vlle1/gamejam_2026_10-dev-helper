@@ -20,6 +20,7 @@ function createState() {
     restPoints: [],
     history: [],
     roundTargetCounts: [],
+    undoSnapshot: null,
     ball: { x: 0, y: 0, vx: 0, vy: 0, r: CONFIG.ball.radius }
   };
 }

@@ -41,6 +41,8 @@ const ui = {
   pauseMenu: document.getElementById('pauseMenu'),
   pauseResumeButton: document.getElementById('pauseResumeButton'),
   pauseRestartButton: document.getElementById('pauseRestartButton'),
+  undoButton: document.getElementById('undoButton'),
+  pauseUndoButton: document.getElementById('pauseUndoButton'),
   pauseLevelButton: document.getElementById('pauseLevelButton'),
   pauseTipsButton: document.getElementById('pauseTipsButton'),
   pauseTipsPanel: document.getElementById('pauseTipsPanel'),
